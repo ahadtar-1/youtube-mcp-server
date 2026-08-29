@@ -1,7 +1,7 @@
 # YouTube MCP Server Dependencies
 
 # Core MCP SDK with CLI support
-mcp[cli]>=1.4.0
+mcp[cli]>=1.4.0,<2.0.0
 
 # HTTP client for YouTube API requests
 httpx>=0.25.0
