@@ -26,7 +26,7 @@ except ImportError:
     NoTranscriptFound = None
 
 _ = load_dotenv(find_dotenv())
-youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 # Initialize the MCP server
 mcp = FastMCP("YouTube Data Server", host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
@@ -89,27 +89,27 @@ def get_video_id_from_url(url: str) -> Optional[str]:
         
     return None
 
-def get_playlist_id_from_url(url: str) -> Optional[str]:
-    """
-    Extract playlist ID from YouTube URL formats.
+#def get_playlist_id_from_url(url: str) -> Optional[str]:
+#    """
+#    Extract playlist ID from YouTube URL formats.
     
-    Supports:
-    - https://www.youtube.com/playlist?list=PLAYLIST_ID
-    - https://youtube.com/playlist?list=PLAYLIST_ID
-    """
-    if not url:
-        return None
+#    Supports:
+#    - https://www.youtube.com/playlist?list=PLAYLIST_ID
+#    - https://youtube.com/playlist?list=PLAYLIST_ID
+#    """
+#    if not url:
+#        return None
         
-    parsed = urlparse(url)
-    if parsed.hostname in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
-        query_params = parse_qs(parsed.query)
-        return query_params.get("list", [None])[0]
+#    parsed = urlparse(url)
+#    if parsed.hostname in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
+#        query_params = parse_qs(parsed.query)
+#        return query_params.get("list", [None])[0]
     
     # If it's already just an ID
-    if re.match(r'^[a-zA-Z0-9_-]+$', url):
-        return url
+#    if re.match(r'^[a-zA-Z0-9_-]+$', url):
+#        return url
         
-    return None
+#    return None
 
 def get_channel_id_from_url(url: str) -> Optional[str]:
     """
@@ -249,7 +249,7 @@ Video URL: https://www.youtube.com/watch?v={video_id}
     except Exception as e:
         return f"Error fetching video details: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def get_playlist_details(playlist_input: str) -> str:
     """
     Get information about a YouTube playlist.
@@ -301,7 +301,7 @@ Playlist URL: https://www.youtube.com/playlist?list={playlist_id}
     except Exception as e:
         return f"Error fetching playlist details: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def get_playlist_items(playlist_input: str, max_results: int = 10) -> str:
     """
     Get videos from a YouTube playlist.
@@ -364,7 +364,7 @@ Videos:
     except Exception as e:
         return f"Error fetching playlist items: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def get_channel_details(channel_input: str) -> str:
     """
     Get detailed information about a YouTube channel.
@@ -813,7 +813,7 @@ Videos:
     except Exception as e:
         return f"Error fetching trending videos: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def get_video_comments(video_input: str, max_results: int = 10, order: str = "relevance") -> str:
     """
     Get comments from a YouTube video.
@@ -1088,7 +1088,7 @@ Note: Engagement benchmarks are based on general industry averages and may vary 
     except Exception as e:
         return f"Error analyzing video engagement: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def get_channel_playlists(channel_input: str, max_results: int = 10) -> str:
     """
     Get playlists from a YouTube channel.
@@ -1294,7 +1294,7 @@ Manually created captions are typically more accurate than auto-generated ones."
         else:
             return f"Error fetching video caption info: {str(e)}"
 
-@mcp.tool()
+#@mcp.tool()
 async def evaluate_video_for_knowledge_base(video_input: str) -> str:
     """
     Analyze video metadata to help decide if video is worth adding to knowledge base.
