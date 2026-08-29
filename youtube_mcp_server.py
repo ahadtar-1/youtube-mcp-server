@@ -29,7 +29,7 @@ _ = load_dotenv(find_dotenv())
 youtube_api_key = os.getenv("YOUTUBE_API_KEY")
 
 # Initialize the MCP server
-mcp = FastMCP("YouTube Data Server")
+mcp = FastMCP("YouTube Data Server", host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
 # YouTube API configuration
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
@@ -1730,4 +1730,4 @@ Note: Monitor your quota usage carefully. Consider caching results for frequentl
 if __name__ == "__main__":
     # For MCP protocol, we can't print to stdout - it must only contain JSON
     # The API key check will happen when tools are called
-    mcp.run(transport='streamable-http', host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+    mcp.run(transport='streamable-http')
