@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs, urlparse
-
+from dotenv import load_dotenv, find_dotenv
 import httpx
 from mcp.server.fastmcp import FastMCP
 # YouTube transcript API imports (optional dependency)
@@ -25,6 +25,9 @@ except ImportError:
     TranscriptsDisabled = None
     NoTranscriptFound = None
 
+_ = load_dotenv(find_dotenv())
+youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+
 # Initialize the MCP server
 mcp = FastMCP("YouTube Data Server")
 
@@ -32,30 +35,30 @@ mcp = FastMCP("YouTube Data Server")
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 
 # Load API key from credentials file
-def load_api_key() -> str:
-    """Load YouTube API key from credentials.yml file."""
-    script_dir = Path(__file__).parent
-    credentials_file = script_dir / "credentials.yml"
+#def load_api_key() -> str:
+#    """Load YouTube API key from credentials.yml file."""
+#    script_dir = Path(__file__).parent
+#    credentials_file = script_dir / "credentials.yml"
     
-    try:
-        with open(credentials_file, 'r') as f:
-            content = f.read()
+#    try:
+#        with open(credentials_file, 'r') as f:
+#            content = f.read()
             # Simple parsing for youtube_api_key: "value"
-            for line in content.split('\n'):
-                if line.strip().startswith('youtube_api_key:'):
+#            for line in content.split('\n'):
+#                if line.strip().startswith('youtube_api_key:'):
                     # Extract the value between quotes
-                    key_part = line.split('youtube_api_key:')[1].strip()
-                    if key_part.startswith('"') and key_part.endswith('"'):
-                        return key_part[1:-1]  # Remove quotes
-                    else:
-                        return key_part.strip('\"\'')
-        raise ValueError("youtube_api_key not found in credentials.yml")
-    except FileNotFoundError:
-        raise ValueError("credentials.yml file not found. Please create it with your YouTube API key.")
-    except Exception as e:
-        raise ValueError(f"Error reading credentials.yml: {str(e)}")
+#                    key_part = line.split('youtube_api_key:')[1].strip()
+#                    if key_part.startswith('"') and key_part.endswith('"'):
+#                        return key_part[1:-1]  # Remove quotes
+#                    else:
+#                        return key_part.strip('\"\'')
+#        raise ValueError("youtube_api_key not found in credentials.yml")
+#    except FileNotFoundError:
+#        raise ValueError("credentials.yml file not found. Please create it with your YouTube API key.")
+#    except Exception as e:
+#        raise ValueError(f"Error reading credentials.yml: {str(e)}")
 
-API_KEY = load_api_key()
+#API_KEY = load_api_key()
 
 def get_video_id_from_url(url: str) -> Optional[str]:
     """
@@ -712,12 +715,13 @@ Videos:
         return f"Error searching videos: {str(e)}"
 
 @mcp.tool()
-async def get_trending_videos(region_code: str = "US", max_results: int = 10) -> str:
+async def get_trending_videos(region_code: str = "US", category_id: str = None, max_results: int = 10) -> str:
     """
     Get trending videos from YouTube for a specific region.
     
     Args:
         region_code: Country code (US, GB, CA, etc.) - default: US
+        category_id: Optional video category ID (e.g "10" for Music) - default: None (no filter)
         max_results: Maximum number of videos to return (default: 10, max: 50)
         
     Returns:
@@ -727,14 +731,22 @@ async def get_trending_videos(region_code: str = "US", max_results: int = 10) ->
     max_results = max(1, min(50, max_results))
     
     try:
-        # Get trending videos (most popular)
-        trending_data = await make_youtube_api_request("videos", {
+        params = {
             "part": "snippet,statistics,contentDetails",
             "chart": "mostPopular",
             "regionCode": region_code,
             "maxResults": max_results
-        })
-        
+        }
+        if category_id:
+            params["videoCategoryId"] = category_id
+        # Get trending videos (most popular)
+        #trending_data = await make_youtube_api_request("videos", {
+        #    "part": "snippet,statistics,contentDetails",
+        #    "chart": "mostPopular",
+        #    "regionCode": region_code,
+        #    "maxResults": max_results
+        #})
+        trending_data = await make_youtube_api_request("videos", params)
         if not trending_data.get("items"):
             return f"No trending videos found for region: {region_code}"
         
@@ -1718,4 +1730,4 @@ Note: Monitor your quota usage carefully. Consider caching results for frequentl
 if __name__ == "__main__":
     # For MCP protocol, we can't print to stdout - it must only contain JSON
     # The API key check will happen when tools are called
-    mcp.run()
+    mcp.run(transport='streamable-http', host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
